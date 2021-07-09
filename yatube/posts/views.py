@@ -44,7 +44,7 @@ def profile(request, username):
         "page": page,
         "count_posts": count_posts,
         "following": following
-        }
+    }
     )
 
 
