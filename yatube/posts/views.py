@@ -37,14 +37,15 @@ def profile(request, username):
     paginator = Paginator(posts, settings.COUNT_PAGINATOR)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
-    following = user.is_authenticated and(
+    following = user.is_authenticated and (
         Follow.objects.filter(user=user, author=author).exists())
     return render(request, "posts/profile.html", {
         "author": author,
         "page": page,
         "count_posts": count_posts,
         "following": following
-        })
+        }
+    )
 
 
 @login_required
