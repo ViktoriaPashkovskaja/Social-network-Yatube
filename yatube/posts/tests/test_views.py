@@ -175,8 +175,7 @@ class CacheTests(TestCase):
         cache.clear()
         response_before = self.authorized_client.get(reverse('index'))
         self.assertEqual(
-                    len(response_before.context.get('page').object_list), 1
-                )
+                    len(response_before.context.get('page').object_list), 1)
 
         Post.objects.create(
             text='Text_test_2',
@@ -186,15 +185,13 @@ class CacheTests(TestCase):
 
         response_after = self.authorized_client.get(reverse('index'))
         self.assertEqual(
-                    len(response_after.context.get('page').object_list), 2
-                )
-        
+                    len(response_after.context.get('page').object_list), 2)
+
         time.sleep(21)
 
         response_after_20 = self.authorized_client.get(reverse('index'))
         self.assertEqual(
-                    len(response_after_20.context.get('page').object_list), 2
-                )
+                    len(response_after_20.context.get('page').object_list), 2)
 
 
 class PaginatorViewsTest(TestCase):

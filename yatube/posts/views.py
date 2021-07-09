@@ -2,10 +2,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.cache import cache_page
 
 from .forms import PostForm, CommentForm
-from .models import Comment, Post, Group, User, Follow
+from .models import Post, Group, User, Follow
 
 
 def index(request):
@@ -18,6 +17,7 @@ def index(request):
         'index.html',
         {'page': page, 'paginator': paginator}
     )
+
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
@@ -39,8 +39,12 @@ def profile(request, username):
     page = paginator.get_page(page_number)
     following = user.is_authenticated and(
         Follow.objects.filter(user=user, author=author).exists())
-    return render(request, "posts/profile.html", {"author": author,
-                  "page": page, "count_posts": count_posts, "following": following})
+    return render(request, "posts/profile.html", {
+        "author": author,
+        "page": page,
+        "count_posts": count_posts,
+        "following": following
+        })
 
 
 @login_required
@@ -92,16 +96,19 @@ def post_edit(request, username, post_id):
         return redirect('post', username=username, post_id=post_id)
     return render(request, 'posts/new.html', {'form': form, 'post': post})
 
+
 def page_not_found(request, exception):
     return render(
-        request, 
-        "misc/404.html", 
-        {"path": request.path}, 
+        request,
+        "misc/404.html",
+        {"path": request.path},
         status=404
     )
 
+
 def server_error(request):
-    return render(request, "misc/500.html", status=500) 
+    return render(request, "misc/500.html", status=500)
+
 
 @login_required
 def add_comment(request, username, post_id):
@@ -117,6 +124,7 @@ def add_comment(request, username, post_id):
         return redirect('post', username, post_id)
     return render(request, "post.html", context={"form": form})
 
+
 @login_required
 def follow_index(request):
     post_list = Post.objects.filter(author__following__user=request.user)
@@ -128,6 +136,7 @@ def follow_index(request):
         "includes/follow.html",
         {'page': page, 'paginator': paginator}
     )
+
 
 @login_required
 def profile_follow(request, username):

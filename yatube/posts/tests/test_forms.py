@@ -4,7 +4,6 @@ import tempfile
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.http import response
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
@@ -13,19 +12,21 @@ from ..models import Group, Post
 User = get_user_model()
 
 TEMP_MEDIA = tempfile.mkdtemp(dir=settings.BASE_DIR)
-@override_settings (MEDIA_ROOT=TEMP_MEDIA)
+
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA)
 class OurTestCase(TestCase):
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(TEMP_MEDIA, ignore_errors=True)
         super().tearDownClass()
 
+
 class PostCreateFormTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.author = User.objects.create_user(username='Anonim')
-        
         cls.small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x01\x00'
             b'\x01\x00\x00\x00\x00\x21\xf9\x04'
