@@ -7,7 +7,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from http import HTTPStatus
 
-from ..models import Group, Post
+from ..models import Group, Post, Follow
 
 User = get_user_model()
 
@@ -30,6 +30,14 @@ class PostPagesTests(TestCase):
             group=cls.group
         )
 
+        cls.url_comment = reverse(
+            'add_comment',
+            kwargs={
+                'username': cls.post.author.username,
+                'post_id': cls.post.id
+            }
+        )
+        
         cls.templates_url_names = {
             'index.html': reverse('index'),
             'posts/group.html': (
@@ -135,22 +143,87 @@ class PostPagesTests(TestCase):
         self.assertEqual(post.group, PostPagesTests.post.group)
         self.assertEqual(post.pub_date, PostPagesTests.post.pub_date)
 
-    def test_post_comment(self):
-        response = self.authorized_client.get(reverse(
-            'add_comment',
-            kwargs={
-                'username': self.author.username,
-                'post_id': self.post.id
-            }
-        )
-        )
-        form_fields = {
-            'text': forms.fields.CharField,
-        }
-        for value, expect in form_fields.items():
-            with self.subTest(value=value):
-                form_field = response.context['comment'].fields[value]
-                self.assertIsInstance(form_field, expect)
+
+class TestFollow(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='TestUser')
+        cls.group = Group.objects.create(title='TestGroup',
+                                         slug='test_slug',
+                                         description='Test description')
+        cls.follow_user = User.objects.create_user(username='TestAuthor')
+
+    def setUp(self):
+        self.authorized_user = Client()
+        self.authorized_user.force_login(self.follow_user)
+
+    def test_follow(self):
+        self.authorized_user.get(reverse('profile_follow', kwargs={
+            'username': self.user.username}))
+        follow = Follow.objects.first()
+        self.assertEqual(Follow.objects.count(), 1)
+        self.assertEqual(follow.author, self.user)
+        self.assertEqual(follow.user, self.follow_user)
+
+    def test_unfollow(self):
+        self.authorized_user.get(reverse('profile_follow', kwargs={
+            'username': self.user.username}))
+        self.authorized_user.get(reverse('profile_unfollow', kwargs={
+            'username': self.user.username}))
+        self.assertFalse(Follow.objects.exists())
+
+    def test_follow_index(self):
+        Post.objects.create(author=self.user, text='test follow text',
+                            group=self.group)
+        self.authorized_user.get(reverse('profile_follow', kwargs={
+            'username': self.user.username}))
+        response = self.authorized_user.get(reverse('follow_index'))
+        post = response.context['post']
+        self.assertEqual(post.text, 'test follow text')
+        self.assertEqual(post.author, self.user)
+        self.assertEqual(post.group.id, self.group.id)
+
+    def test_not_follow_index(self):
+        Post.objects.create(author=self.user, text='test follow text',
+                            group=self.group)
+        response = self.authorized_user.get(reverse('follow_index'))
+        self.assertEqual(response.context['paginator'].count, 0)
+
+    def test_following_self(self):
+        self.assertEqual(Follow.objects.all().count(), 0)
+        self.authorized_user.get(reverse('profile_follow', kwargs={
+            'username': self.follow_user.username}))
+        self.assertEqual(Follow.objects.all().count(), 0)
+        self.authorized_user.get(reverse('profile_follow', kwargs={
+            'username': self.user.username}))
+        self.assertEqual(Follow.objects.all().count(), 1)
+
+
+class TestComments(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='TestUser')
+        cls.comment_user = User.objects.create_user(username='TestCommentUser')
+        cls.post = Post.objects.create(text='test text', author=cls.user)
+        cls.url_comment = reverse('add_comment', kwargs={
+            'username': cls.post.author.username, 'post_id': cls.post.id})
+
+    def setUp(self):
+        self.anonymous = Client()
+        self.authorized_user = Client()
+        self.authorized_user.force_login(self.comment_user)
+
+    def test_comment_anonymous(self):
+        response = self.anonymous.get(self.url_comment)
+        urls = '/auth/login/?next={}'.format(self.url_comment)
+        self.assertRedirects(response, urls, status_code=HTTPStatus.FOUND)
+
+    def test_comment_authorized(self):
+        response = self.authorized_user.post(self.url_comment, {
+            'text': 'test comment'}, follow=True)
+        self.assertContains(response, 'test comment')
 
 
 class CacheTests(TestCase):

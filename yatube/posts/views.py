@@ -51,7 +51,7 @@ def profile(request, username):
 @login_required
 def new_post(request):
     if request.method == 'POST':
-        form = PostForm(request.POST)
+        form = PostForm(request.POST, files=request.FILES or None)
 
         if form.is_valid():
             post = form.save(commit=False)
