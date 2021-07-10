@@ -37,7 +37,7 @@ class PostPagesTests(TestCase):
                 'post_id': cls.post.id
             }
         )
-        
+
         cls.templates_url_names = {
             'index.html': reverse('index'),
             'posts/group.html': (
