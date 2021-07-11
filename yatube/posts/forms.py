@@ -1,17 +1,17 @@
 from django import forms
 from django.forms import ModelForm
 
-from .models import Post, Comment
+from .models import Post, Group, Comment
 
 
 class PostForm(ModelForm):
     class Meta:
         model = Post
-        fields = ['text', 'group', 'image']
-        group = forms.ModelChoiceField(queryset=Post.objects.all(),
+        fields = ["text", "group", "image"]
+        group = forms.ModelChoiceField(queryset=Group.objects.all(),
                                        required=False, to_field_name="group")
         widgets = {
-            'text': forms.Textarea(),
+            "text": forms.Textarea(),
         }
 
         labels = {
@@ -26,7 +26,7 @@ class CommentForm(forms.ModelForm):
         fields = ("text",)
 
         widgets = {
-            'text': forms.Textarea(),
+            "text": forms.Textarea(),
         }
 
         labels = {
