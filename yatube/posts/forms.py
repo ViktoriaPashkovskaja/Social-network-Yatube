@@ -8,8 +8,6 @@ class PostForm(ModelForm):
     class Meta:
         model = Post
         fields = ["text", "group", "image"]
-        group = forms.ModelChoiceField(queryset=Group.objects.all(),
-                                       required=False, to_field_name="group")
         widgets = {
             "text": forms.Textarea(),
         }
