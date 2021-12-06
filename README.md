@@ -1,3 +1,12 @@
-# hw05_final
+Учебный проект от Яндекс.Практикум, представляет собой собственный блог с системой подписок, комментариев и лайков, проект покрыт тестами и прошел код ревью.
 
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+Стек технологий:
+Python3
+Django
+Pytest
+Pillow
+Bootstrap
+
+Установка:
+Выполнить pip install -r requirements.txt
+Выполнить python3 manage.py runserver
