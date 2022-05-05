@@ -7,11 +7,11 @@ SECRET_KEY = os.getenv("SECRET_KEY", default="SUP3R-S3CR3T-K3Y-F0R-MY-PR0J3CT")
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    # 'www.yatubeya.pythonanywhere.com',
-    # 'yatubeya.pythonanywhere.com',
+    "www.yatubeya.ru",
+    "yatubeya.ru",
     "localhost",
     "127.0.0.1",
-    "[::1]",
+    "31.31.196.219",
     "testserver",
 ]
 
